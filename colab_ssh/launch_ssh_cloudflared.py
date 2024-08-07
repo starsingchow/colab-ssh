@@ -15,10 +15,11 @@ deb_install = create_deb_installer()
 
 
 def launch_ssh_cloudflared(
-               password="",
-               verbose=False,
-               prevent_interrupt=False,
-               kill_other_processes=True):
+        password="",
+        self_hosts_token=None,
+        verbose=False,
+        prevent_interrupt=False,
+        kill_other_processes=True):
     # Kill any cloudflared process if running
     if kill_other_processes:
         os.system("kill -9 $(ps aux | grep 'cloudflared' | awk '{print $2}')")
@@ -61,8 +62,12 @@ def launch_ssh_cloudflared(
     # Clear the log file, this is required since we are getting the url
     open('cloudflared.log', 'w').close()
 
+    if self_hosts_token:
+        os.system(f"./cloudflared service install {self_hosts_token}")
+
     # Prepare the cloudflared command
-    popen_command = f'./cloudflared tunnel --url ssh://localhost:22 --logfile ./cloudflared.log --metrics localhost:45678 {" ".join(extra_params)}'
+    popen_command = f'./cloudflared tunnel --url ssh://localhost:22 --logfile ./cloudflared.log --metrics localhost:45678 {
+        " ".join(extra_params)}'
     preexec_fn = None
     if prevent_interrupt:
         popen_command = 'nohup ' + popen_command
