@@ -64,8 +64,8 @@ def launch_ssh_cloudflared(
 
     # Prepare the cloudflared command
     if self_hosts_token:
-        popen_command = f'./cloudflared --autoupdate-freq 24h0m0s tunnel run --token {
-            self_hosts_token} --logfile ./cloudflared.log --metrics localhost:45678 {" ".join(extra_params)}'
+        popen_command = f'./cloudflared --autoupdate-freq 24h0m0s tunnel --logfile ./cloudflared.log --metrics localhost:45678 {
+            " ".join(extra_params)} run --token {self_hosts_token}'
     else:
         popen_command = f'./cloudflared tunnel --url ssh://localhost:22 --logfile ./cloudflared.log --metrics localhost:45678 {
             " ".join(extra_params)}'
