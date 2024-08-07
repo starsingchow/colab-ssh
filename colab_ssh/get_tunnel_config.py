@@ -24,11 +24,7 @@ def get_argo_tunnel_config(initial_path=""):
     result = re.search(':\"\| *https://(.+?.trycloudflare.com) *\|\"}', output)
     # result = re.search('cloudflared_tunnel_user_hostnames_counts{userHostname="https://(.+?)"}', output)
     if result is None:
-        return {
-            "domain": "maybe use self domain",
-            "protocol": "",
-            "port": 22
-        }
+        raise Exception("Cannot get any result from cloudflared metrics")
     hostname = result.group(1)
     if hostname is None:
         raise Exception(

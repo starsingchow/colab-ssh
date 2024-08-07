@@ -62,12 +62,14 @@ def launch_ssh_cloudflared(
     # Clear the log file, this is required since we are getting the url
     open('cloudflared.log', 'w').close()
 
-    if self_hosts_token:
-        os.system(f"./cloudflared service install {self_hosts_token}")
-
     # Prepare the cloudflared command
-    popen_command = f'./cloudflared tunnel --url ssh://localhost:22 --logfile ./cloudflared.log --metrics localhost:45678 {
-        " ".join(extra_params)}'
+    if self_hosts_token:
+        popen_command = f'./cloudflared --autoupdate-freq 24h0m0s tunnel run --token {
+            self_hosts_token} --logfile ./cloudflared.log --metrics localhost:45678 {" ".join(extra_params)}'
+    else:
+        popen_command = f'./cloudflared tunnel --url ssh://localhost:22 --logfile ./cloudflared.log --metrics localhost:45678 {
+            " ".join(extra_params)}'
+
     preexec_fn = None
     if prevent_interrupt:
         popen_command = 'nohup ' + popen_command
@@ -84,7 +86,14 @@ def launch_ssh_cloudflared(
             print(f"DEBUG: Cloudflared process: PID={proc.pid}")
         time.sleep(sleep_time)
         try:
-            info = get_argo_tunnel_config()
+            if self_hosts_token:
+                info = {
+                    "domain": "self hosted",
+                    "protocol": "",
+                    "port": 22
+                }
+            else:
+                info = get_argo_tunnel_config()
             break
         except Exception as e:
             os.kill(proc.pid, signal.SIGKILL)
